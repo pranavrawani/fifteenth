@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Equation of Us ♾️</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredericka+the+Great&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --board-bg: #2b3a42; /* Blackboard Green/Grey */
+            --chalk-white: #f1f1f1;
+            --chalk-yellow: #f5e68b;
+            --chalk-pink: #f58b8b;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #1a262f;
+            font-family: 'Fredericka the Great', cursive;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--chalk-white);
+        }
+
+        /* --- THE CHALKBOARD --- */
+        .chalkboard {
+            position: relative;
+            width: 90%;
+            max-width: 800px;
+            height: 80vh;
+            background-color: var(--board-bg);
+            border: 12px solid #5a3825; /* Wood Frame */
+            border-radius: 5px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            z-index: 10;
+            overflow: hidden;
+        }
+
+        /* Chalk dust texture overlay */
+        .chalkboard::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('https://www.transparenttextures.com/patterns/black-chalk.png');
+            opacity: 0.5;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* --- BACKGROUND ANIMATIONS (Geometry) --- */
+        .geo-layer {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .shape {
+            position: absolute;
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.1);
+            stroke-width: 2;
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: drawShape 10s linear infinite;
+        }
+
+        @keyframes drawShape {
+            0% { stroke-dashoffset: 1000; opacity: 1; }
+            50% { stroke-dashoffset: 0; opacity: 1; }
+            100% { stroke-dashoffset: 0; opacity: 0; }
+        }
+
+        /* --- FLOATING SYMBOLS --- */
+        .symbol {
+            position: absolute;
+            color: rgba(255, 255, 255, 0.15);
+            font-size: 1.5rem;
+            animation: floatMath 15s linear infinite;
+            z-index: 1;
+        }
+
+        @keyframes floatMath {
+            0% { transform: translateY(110vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.6; }
+            90% { opacity: 0.6; }
+            100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+        }
+
+        /* --- MAIN CONTENT --- */
+        .content {
+            z-index: 10;
+            width: 100%;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 40px;
+            letter-spacing: 2px;
+        }
+
+        .equation-box {
+            font-size: 3rem;
+            margin-bottom: 40px;
+            min-height: 80px;
+        }
+
+        .variable { color: var(--chalk-yellow); }
+        .operator { margin: 0 10px; }
+        
+        .solve-btn {
+            background: transparent;
+            border: 3px solid var(--chalk-white);
+            color: var(--chalk-white);
+            font-family: 'Fredericka the Great', cursive;
+            font-size: 1.5rem;
+            padding: 10px 40px;
+            cursor: pointer;
+            border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px; /* Sketchy border */
+            transition: all 0.2s;
+        }
+
+        .solve-btn:hover {
+            transform: scale(1.1) rotate(-2deg);
+            border-color: var(--chalk-pink);
+            color: var(--chalk-pink);
+        }
+
+        .quote {
+            margin-top: 50px;
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.8);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 1s ease;
+        }
+
+        /* --- SOLVED STATE ANIMATIONS --- */
+        .heart-shape {
+            color: var(--chalk-pink);
+            font-size: 5rem;
+            display: inline-block;
+            animation: heartbeat 1.5s infinite;
+        }
+
+        @keyframes heartbeat {
+            0% { transform: scale(1); }
+            15% { transform: scale(1.3); }
+            30% { transform: scale(1); }
+            45% { transform: scale(1.15); }
+            60% { transform: scale(1); }
+        }
+
+        /* Mobile Fix */
+        @media (max-width: 600px) {
+            .chalkboard { width: 95%; height: 90vh; border-width: 6px; }
+            .equation-box { font-size: 2rem; }
+            h1 { font-size: 1.8rem; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="chalkboard">
+        <svg class="geo-layer" id="geoLayer">
+            </svg>
+
+        <div class="geo-layer" id="symbolLayer"></div>
+
+        <div class="content">
+            <h1>Problem #143:</h1>
+            
+            <div class="equation-box" id="equation">
+                <span class="variable">You</span> 
+                <span class="operator">+</span> 
+                <span class="variable">Me</span> 
+                <span class="operator">=</span> 
+                <span id="result">?</span>
+            </div>
+
+            <button class="solve-btn" id="solveBtn" onclick="solveEquation()">Solve for x</button>
+            
+            <p class="quote" id="quote">
+                "My love for you is like Pi:<br>
+                <span style="color: var(--chalk-pink)">Irrational</span> and <span style="color: var(--chalk-pink)">Never-ending</span>."
+                <br><br>
+                <span style="font-size: 0.8em; opacity: 0.6">Q.E.D. (Quod Erat Demonstrandum)</span>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. GEOMETRY ANIMATION (SVG) ---
+        const svgLayer = document.getElementById('geoLayer');
+        
+        function createShape() {
+            const types = ['circle', 'rect', 'line', 'polygon'];
+            const type = types[Math.floor(Math.random() * types.length)];
+            const shape = document.createElementNS("http://www.w3.org/2000/svg", type);
+            
+            // Random Position & Size
+            const size = Math.random() * 100 + 50;
+            const x = Math.random() * 100 + '%';
+            const y = Math.random() * 100 + '%';
+
+            shape.classList.add('shape');
+
+            if(type === 'circle') {
+                shape.setAttribute('cx', x);
+                shape.setAttribute('cy', y);
+                shape.setAttribute('r', size/2);
+            } else if (type === 'rect') {
+                shape.setAttribute('x', x);
+                shape.setAttribute('y', y);
+                shape.setAttribute('width', size);
+                shape.setAttribute('height', size);
+            } else if (type === 'polygon') {
+                // Simple Triangle
+                shape.setAttribute('points', `0,${size} ${size},${size} ${size/2},0`);
+                shape.setAttribute('transform', `translate(${Math.random()*800}, ${Math.random()*600})`);
+            }
+
+            svgLayer.appendChild(shape);
+
+            // Remove after animation
+            setTimeout(() => shape.remove(), 10000);
+        }
+        setInterval(createShape, 2000);
+
+        // --- 2. FLOATING SYMBOLS ---
+        const symbolLayer = document.getElementById('symbolLayer');
+        const symbols = ['π', '∞', '∑', '√', '∫', '≠', '≈', '÷', '∠', '∅'];
+
+        function createSymbol() {
+            const el = document.createElement('div');
+            el.classList.add('symbol');
+            el.innerText = symbols[Math.floor(Math.random() * symbols.length)];
+            el.style.left = Math.random() * 95 + '%';
+            el.style.animationDuration = (Math.random() * 10 + 10) + 's';
+            symbolLayer.appendChild(el);
+            setTimeout(() => el.remove(), 20000);
+        }
+        setInterval(createSymbol, 800);
+
+        // --- 3. SOLVE LOGIC ---
+        function solveEquation() {
+            const result = document.getElementById('result');
+            const btn = document.getElementById('solveBtn');
+            const quote = document.getElementById('quote');
+            
+            // Disable button
+            btn.style.opacity = '0';
+            btn.style.pointerEvents = 'none';
+
+            // "Calculation" effect
+            let steps = ['x', '...', '4x', 'y²', '...'];
+            let i = 0;
+            
+            const interval = setInterval(() => {
+                result.innerText = steps[i % steps.length];
+                i++;
+            }, 150);
+
+            setTimeout(() => {
+                clearInterval(interval);
+                // Final Result: Infinity Symbol or Heart
+                result.innerHTML = '<span class="heart-shape">∞</span>';
+                result.style.color = '#f58b8b'; // Chalk Pink
+                
+                // Show Quote
+                quote.style.opacity = '1';
+                quote.style.transform = 'translateY(0)';
+                
+                // Trigger Confetti (Chalk dust style)
+                createChalkDust();
+            }, 1500);
+        }
+
+        function createChalkDust() {
+            for(let i=0; i<50; i++) {
+                const dot = document.createElement('div');
+                dot.style.position = 'absolute';
+                dot.style.width = '4px';
+                dot.style.height = '4px';
+                dot.style.background = 'white';
+                dot.style.borderRadius = '50%';
+                dot.style.left = '50%';
+                dot.style.top = '50%';
+                dot.style.pointerEvents = 'none';
+                document.body.appendChild(dot);
+
+                const angle = Math.random() * Math.PI * 2;
+                const velocity = Math.random() * 200 + 50;
+
+                const anim = dot.animate([
+                    { transform: 'translate(-50%, -50%) scale(1)', opacity: 1 },
+                    { transform: `translate(${Math.cos(angle)*velocity}px, ${Math.sin(angle)*velocity}px) scale(0)`, opacity: 0 }
+                ], { duration: 1000, easing: 'ease-out' });
+
+                anim.onfinish = () => dot.remove();
+            }
+        }
+
+    </script>
+</body>
+</html>
